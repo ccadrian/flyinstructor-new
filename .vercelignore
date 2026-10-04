@@ -1,0 +1,5 @@
+# Agent tooling and design references, not part of the site
+.agents
+.claude
+design-md
+skills-lock.json
