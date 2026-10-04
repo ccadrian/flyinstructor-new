@@ -1,0 +1,31 @@
+/* Self-hosted webfonts (Latin subset), so no visitor data goes to Google.
+   Archivo, Geist and Geist Mono are variable fonts. Licensed under the
+   SIL Open Font License 1.1, see the OFL-*.txt files in this folder. */
+@font-face{
+  font-family:'Archivo';
+  font-style:normal;
+  font-weight:500 900;
+  font-display:swap;
+  src:url('/fonts/archivo-latin.woff2') format('woff2');
+}
+@font-face{
+  font-family:'Geist';
+  font-style:normal;
+  font-weight:400 600;
+  font-display:swap;
+  src:url('/fonts/geist-latin.woff2') format('woff2');
+}
+@font-face{
+  font-family:'Geist Mono';
+  font-style:normal;
+  font-weight:400 500;
+  font-display:swap;
+  src:url('/fonts/geist-mono-latin.woff2') format('woff2');
+}
+@font-face{
+  font-family:'Barlow Condensed';
+  font-style:normal;
+  font-weight:600;
+  font-display:swap;
+  src:url('/fonts/barlow-condensed-600-latin.woff2') format('woff2');
+}

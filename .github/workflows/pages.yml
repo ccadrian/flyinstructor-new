@@ -1,0 +1,49 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v7
+
+      - id: pages
+        uses: actions/configure-pages@v6
+
+      - name: Build site folder
+        env:
+          BASE: ${{ steps.pages.outputs.base_path }}
+        run: |
+          # Only the public site, never the agent skills, design references or the Vercel function
+          mkdir _site
+          cp index.html 404.html legal-notice.html privacy-policy.html robots.txt _site/
+          cp -r fonts _site/fonts
+          # The pages use root-relative links (/fonts/..., /legal-notice.html). A project site
+          # lives under $BASE (e.g. /flyinstructor-new), so prefix them; with a custom domain BASE is empty.
+          sed -i -e "s#\(href\|src\)=\"/#\1=\"$BASE/#g" _site/*.html
+          sed -i -e "s#url('/fonts/#url('$BASE/fonts/#g" _site/fonts/fonts.css
+          # Vercel Web Analytics only exists on Vercel
+          sed -i -e '/Vercel Web Analytics (cookieless)/d' -e '/_vercel\/insights/d' _site/*.html
+
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: _site
+
+      - id: deployment
+        uses: actions/deploy-pages@v5
