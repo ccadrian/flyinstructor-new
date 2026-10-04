@@ -1,0 +1,12 @@
+{
+  "name": "flyinstructor-site",
+  "version": "1.0.0",
+  "private": true,
+  "description": "flyinstructor.com — static site with a Resend-powered contact form backend.",
+  "scripts": {
+    "dev": "vercel dev"
+  },
+  "dependencies": {
+    "resend": "^4.0.0"
+  }
+}
