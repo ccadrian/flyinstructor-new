@@ -603,6 +603,8 @@
   .form-status[data-state="success"]{color:var(--blue);}
   .form-status[data-state="error"]{color:var(--error);}
   .form-status[data-state="success"] .icon-error, .form-status[data-state="error"] .icon-success{display:none;}
+  .form-status[data-state="info"]{color:var(--ink);}
+  .form-status[data-state="info"] .icon{display:none;}
 
   /* ---------- FOOTER ---------- */
   footer{
@@ -1111,6 +1113,12 @@
   const submitBtn = document.getElementById('submitBtn');
   const submitLabel = submitBtn.querySelector('.btn-label');
   const formStatus = document.getElementById('formStatus');
+  // static hosting (e.g. GitHub Pages) has no /api/contact: hand the message to the visitor's mail app
+  function openMailDraft(p){
+    const subject = `Training inquiry: ${p.rating}`;
+    const body = `Name: ${p.name}\nEmail: ${p.email}\nInterest: ${p.rating}\n\n${p.message}`;
+    window.location.href = `mailto:cockpit@flyinstructor.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  }
   function setStatus(state, text){
     formStatus.dataset.state = state;
     formStatus.querySelector('.status-text').textContent = text;
@@ -1133,8 +1141,13 @@
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       });
-      const data = await response.json().catch(() => ({}));
-      if (!response.ok || !data.ok) throw new Error(data.error || 'Could not send your message. Please try again.');
+      const data = await response.json().catch(() => null);
+      if (!data && [404, 405, 501].includes(response.status)){
+        openMailDraft(payload);
+        setStatus('info', 'Your email app opens with your message. Please send it from there.');
+        return;
+      }
+      if (!response.ok || !data || !data.ok) throw new Error((data && data.error) || 'Could not send your message. Please try again.');
       setStatus('success', 'Message sent, check your inbox for confirmation');
       form.reset();
     } catch (err) {
