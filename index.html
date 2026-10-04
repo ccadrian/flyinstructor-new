@@ -36,6 +36,9 @@
     --error:#B42318;
     --logo-ink:#1d1f20;
     --nav-bg:rgba(250,250,247,0.74);
+    --nav-bg-scrolled:rgba(250,250,247,0.9);
+    --tint:rgba(20,20,19,0.06);
+    --accent-tint:rgba(45,71,224,0.1);
     --overlay:rgba(20,20,19,0.95);
     --on-overlay:#F2F1EC;
     --overlay-accent:#8798E6;
@@ -87,6 +90,9 @@
       --error:#F97066;
       --logo-ink:#EDEBE5;
       --nav-bg:rgba(26,26,24,0.72);
+      --nav-bg-scrolled:rgba(26,26,24,0.9);
+      --tint:rgba(237,235,229,0.08);
+      --accent-tint:rgba(140,156,240,0.18);
       --overlay:rgba(10,10,9,0.95);
       --panel:#1A1E33;
       --panel-accent:#A9B5F5;
@@ -215,15 +221,21 @@
   /* ---------- NAV (floating island) ---------- */
   .nav{
     position:fixed; z-index:var(--z-nav);
-    top:calc(12px + env(safe-area-inset-top)); left:var(--pad-l); right:var(--pad-r);
+    top:calc(12px + env(safe-area-inset-top));
+    /* centred island that hugs its content */
+    left:0; right:0; margin-inline:auto;
+    width:fit-content; max-width:calc(100% - 2 * var(--gutter));
     display:flex; align-items:center; justify-content:space-between;
-    padding:8px 8px 8px 20px;
+    padding:6px 6px 6px 18px;
     border-radius:var(--r-pill);
     background:var(--nav-bg);
-    backdrop-filter:blur(14px) saturate(1.5);
-    -webkit-backdrop-filter:blur(14px) saturate(1.5);
-    box-shadow:inset 0 0 0 1px var(--hairline), var(--shadow-float);
+    backdrop-filter:blur(16px) saturate(1.6);
+    -webkit-backdrop-filter:blur(16px) saturate(1.6);
+    box-shadow:var(--highlight), inset 0 0 0 1px var(--hairline), var(--shadow-float);
+    transition:background 0.4s var(--ease), box-shadow 0.4s var(--ease);
   }
+  .nav.is-scrolled{background:var(--nav-bg-scrolled); box-shadow:var(--highlight), inset 0 0 0 1px var(--hairline), var(--shadow-lift);}
+  .nav-sep{width:1px; height:22px; background:var(--line); margin:0 10px 0 18px; flex-shrink:0;}
   .logo{
     font-family:var(--font-logo);
     font-weight:600; font-size:22px; line-height:1;
@@ -238,12 +250,16 @@
     text-decoration:none;
     font-family:var(--font-mono);
     font-size:13px; color:var(--ink);
-    padding:10px 18px; border-radius:var(--r-pill);
-    transition:background 0.3s var(--ease), color 0.3s var(--ease), transform 0.3s var(--ease);
+    padding:11px 16px; border-radius:var(--r-pill);
+    transition:background 0.3s var(--ease), color 0.3s var(--ease), box-shadow 0.3s var(--ease), transform 0.3s var(--ease);
   }
-  .nav-item[aria-current]{background:rgba(45,71,224,0.1); color:var(--blue);}
-  .nav-item:hover{background:var(--ink); color:var(--paper); transform:translateY(-1px);}
+  .nav-item:hover{background:var(--tint);}
+  .nav-item[aria-current]{background:var(--accent-tint); color:var(--blue);}
   .nav-item:active{transform:scale(0.96);}
+  /* the last item is the one action in the bar */
+  .nav-cta{background:var(--ink); color:var(--paper); margin-left:6px; padding-inline:20px;}
+  .nav-cta:hover{background:var(--blue); color:var(--on-accent);}
+  .nav-cta[aria-current]{background:var(--blue); color:var(--on-accent);}
   .burger{
     display:none; position:relative;
     width:44px; height:44px; padding:0;
@@ -261,8 +277,8 @@
   .burger[aria-expanded="true"] .burger-line:nth-child(2){transform:translateY(-3.25px) rotate(-45deg);}
   @media (max-width:720px){
     :root{--nav-h:calc(84px + env(safe-area-inset-top));}
-    .nav{padding:6px 6px 6px 18px;}
-    .nav-links{display:none;}
+    .nav{left:var(--pad-l); right:var(--pad-r); width:auto; max-width:none; margin:0;}
+    .nav-sep, .nav-links{display:none;}
     .burger{display:block;}
   }
 
@@ -635,11 +651,12 @@
         <circle cx="12" cy="12" r="9.5" stroke-width="3.1"/>
         <line x1="3.6" y1="12" x2="20.4" y2="12" stroke-width="3.1"/>
       </svg>flyinstructor</a>
+    <span class="nav-sep" aria-hidden="true"></span>
     <div class="nav-links">
       <a class="nav-item" href="#about">About</a>
       <a class="nav-item" href="#training">Training</a>
       <a class="nav-item" href="#route">Process</a>
-      <a class="nav-item" href="#contact">Contact</a>
+      <a class="nav-item nav-cta" href="#contact">Contact</a>
     </div>
     <button class="burger" id="burger" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="mobileMenu">
       <span class="burger-line"></span><span class="burger-line"></span>
@@ -994,6 +1011,11 @@
       else if (!e.shiftKey && document.activeElement === last){ e.preventDefault(); first.focus(); }
     }
   });
+
+  // ---- nav gets a firmer background once the hero top passes under it ----
+  const nav = document.querySelector('.nav');
+  new IntersectionObserver(([entry]) => nav.classList.toggle('is-scrolled', !entry.isIntersecting), { rootMargin: '-80px 0px 0px 0px' })
+    .observe(document.querySelector('.status-pill'));
 
   // ---- highlight the nav item of the section in view ----
   const navItems = [...document.querySelectorAll('.nav-item')];
